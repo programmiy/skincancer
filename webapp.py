@@ -15,7 +15,8 @@ def intro():
         ### 정보
 
         - Check out [streamlit.io](https://streamlit.io)
-        - big thanks [reference from](https://huggingface.co/spaces/ilhamstoked/Classification-Skin-Cancer)
+        - big thanks reference from https://huggingface.co/spaces/ilhamstoked/Classification-Skin-Cancer
+        - 새로운거
 
         ### See more complex demos
 
