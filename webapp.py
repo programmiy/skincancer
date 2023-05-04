@@ -15,7 +15,7 @@ def intro():
         ### 정보
 
         - Check out [streamlit.io](https://streamlit.io)
-        - big thanks reference from 
+        - big thanks 
         - 새로운거
 
         ### See more complex demos
