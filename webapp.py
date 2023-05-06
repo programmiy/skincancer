@@ -37,7 +37,7 @@ def intro():
 
 def usage():
     import streamlit as st
-    st.markdown()
+    
     st.write ("6.	The application also measures the latency or response time for the model to classify the image, and displays it to the user.")
     st.write("Please note that this model still has room for academic revision as it can only classify the following 7 classes")
     st.write("- ['akiec'](https://en.wikipedia.org/wiki/Squamous-cell_carcinoma) - squamous cell carcinoma (actinic keratoses dan intraepithelial carcinoma),")
