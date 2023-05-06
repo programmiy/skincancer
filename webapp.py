@@ -26,7 +26,7 @@ def intro():
         """
     )
 
-def mapping_demo():
+def usage():
     import streamlit as st
     import pandas as pd
     import pydeck as pdk
@@ -123,7 +123,7 @@ to display geospatial data.
             % e.reason
         )
 
-def plotting_demo():
+def based_information():
     import streamlit as st
     import time
     import numpy as np
@@ -155,10 +155,10 @@ Streamlit. We're generating a bunch of random numbers in a loop for around
     # Streamlit widgets automatically run the script from top to bottom. Since
     # this button is not connected to any other logic, it just causes a plain
     # rerun.
-    st.button("Re-run")
+    st.button("다시보기")
 
 
-def data_frame_demo():
+def testing():
     import streamlit as st
     import pandas as pd
     import altair as alt
@@ -218,9 +218,9 @@ def data_frame_demo():
 
 page_names_to_funcs = {
     "홈": intro,
-    "Plotting Demo": plotting_demo,
-    "Mapping Demo": mapping_demo,
-    "DataFrame Demo": data_frame_demo
+    "피부암에 대한 기본 정보": based_information,
+    "사용법": usage,
+    "검사하기": testing
 }
 
 demo_name = st.sidebar.selectbox("Choose a demo", page_names_to_funcs.keys())
