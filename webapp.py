@@ -178,7 +178,7 @@ def testing():
     import altair as alt
     import time
     import tensorflow as tf
-    from tcp_latency import measure_latency
+    
     import numpy as np
     import pandas as pd 
 
