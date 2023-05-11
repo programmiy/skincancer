@@ -1,6 +1,71 @@
 import streamlit as st
 
 
+
+
+
+def classification(compare_img):
+    import numpy as np
+    import cv2
+    from matplotlib import pyplot as plt
+    import glob
+    import io
+    from PIL import Image
+
+    img_list = glob.glob('cancer/*.jpg')
+    compare_img = np.array(compare_img)
+    compare_img = cv2.cvtColor(compare_img, cv2.COLOR_RGB2BGR) 
+    
+
+    orb = cv2.ORB_create()
+    kp2, des2 = orb.detectAndCompute(compare_img, None)
+
+    matches_data = []
+    for img_path in img_list:
+        base_img = cv2.imread(img_path, 0)
+        
+        kp1, des1 = orb.detectAndCompute(base_img, None)
+
+        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+        matches = bf.match(des1, des2)
+        if matches:
+            similarity = sum(match.distance for match in matches) / len(matches)
+        else:
+            similarity = 0
+
+        matches_data.append((img_path, similarity))
+
+    # sort matches by similarity score
+    matches_data.sort(key=lambda x: x[1], reverse=True)
+    
+    # get top 5 matches
+    top_matches = matches_data[:5]
+
+    # Display the matched images
+    for i, (img_path, similarity) in enumerate(top_matches):
+        base_img = cv2.imread(img_path)
+        kp1, des1 = orb.detectAndCompute(base_img, None)
+
+        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+        matches = bf.match(des1, des2)
+        matches = sorted(matches, key=lambda x: x.distance)
+
+        img3 = cv2.drawMatches(base_img, kp1, compare_img, kp2, matches[:10], None, flags=2)
+        
+        # Create a Streamlit image object from the OpenCV image
+        img_bytes = cv2.imencode('.png', img3)[1].tobytes()
+        st.image(Image.open(io.BytesIO(img_bytes)), caption=f'Matched Image #{i+1} (similarity score: {similarity:.2f})')
+
+    
+
+
+
+
+
+
+
+
+
 def intro():
     import streamlit as st
     
@@ -95,7 +160,7 @@ def testing():
     import altair as alt
     import time
     import tensorflow as tf
-    
+    from tqdm import tqdm
     import numpy as np
     import pandas as pd 
 
@@ -119,6 +184,7 @@ def testing():
     def resize_image(image):
         # Resize the image to 150x150 pixels
         resized_image = tf.image.resize(image, [150, 150])
+        
         return resized_image.numpy()
 
     # Define a function to run inference on the TensorFlow Lite model
@@ -127,13 +193,19 @@ def testing():
         resized_image = resize_image(image)
         input_data = np.expand_dims(resized_image, axis=0).astype(np.float32)
         interpreter.set_tensor(input_details[0]['index'], input_data)
-
+        num_iterations = 100
+        progress_bar = st.progress(0)
         # Run inference
         with st.spinner('Classifying...'):
             start_time = time.time()
-            interpreter.invoke()
+            for i in tqdm(range(num_iterations)):
+                # Update the progress bar every iteration
+                progress_percent = int((i + 1) / num_iterations * 100)
+                progress_bar.progress(progress_percent)
+                progress_bar_text = f'{progress_percent}%'
+                progress_bar.text(progress_bar_text)
             end_time = time.time()
-
+        progress_bar.empty()
         # Calculate the classification duration
         classifying_duration = end_time - start_time
 
@@ -150,7 +222,8 @@ def testing():
 
        # Get the input image from the user
     image = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
-
+    
+    
     # Show the input image
     if image is not None:
         image = np.array(Image.open(image).convert("RGB"))
@@ -167,7 +240,7 @@ def testing():
         st.write("Top 3 predictions:")
         for i in range(3):
             st.write("%d. %s (%.2f%%)" % (i + 1, labels[top_3_indices[i]], probs[top_3_indices[i]] * 100))
-            
+        classification(image)
         
 
 page_names_to_funcs = {
