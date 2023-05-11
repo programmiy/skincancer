@@ -53,6 +53,8 @@ def classification(compare_img):
         img3 = cv2.drawMatches(base_img, kp1, compare_img, kp2, matches[:10], None, flags=2)
         
         # Create a Streamlit image object from the OpenCV image
+        st.write(f"Base image shape: {base_img.shape}")
+        st.write(f"Compare image shape: {compare_img.shape}")
         img_bytes = cv2.imencode('.png', img3)[1].tobytes()
         st.image(Image.open(io.BytesIO(img_bytes)), caption=f'Matched Image #{i+1} (similarity score: {similarity:.2f})')
 
@@ -227,6 +229,7 @@ def testing():
     # Show the input image
     if image is not None:
         image = np.array(Image.open(image).convert("RGB"))
+        preresize = image
         st.image(image, width=150)
 
         # Run inference on the input image
@@ -240,7 +243,7 @@ def testing():
         st.write("Top 3 predictions:")
         for i in range(3):
             st.write("%d. %s (%.2f%%)" % (i + 1, labels[top_3_indices[i]], probs[top_3_indices[i]] * 100))
-        classification(image)
+        classification(preresize)
         
 
 page_names_to_funcs = {
