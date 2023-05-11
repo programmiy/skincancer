@@ -6,6 +6,3 @@ opencv-python
 numpy
 tdqm
 pandas
-glob
-io
-PIL
