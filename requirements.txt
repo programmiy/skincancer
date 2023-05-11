@@ -1,7 +1,7 @@
 streamlit
 tensorflow
 numpy
-matplotlib.pylab
+matplotlib
 cv2
 numpy
 tdqm
