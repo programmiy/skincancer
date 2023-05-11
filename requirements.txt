@@ -6,7 +6,6 @@ opencv-python
 numpy
 tdqm
 pandas
-time
 glob
 io
 PIL
