@@ -5,3 +5,8 @@ matplotlib.pylab
 cv2
 numpy
 tdqm
+pandas
+time
+glob
+io
+PIL
