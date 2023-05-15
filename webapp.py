@@ -135,6 +135,9 @@ def intro():
         return get_visitor_count(date) - get_visitor_count(delta)
     
     
+    st.metric(label="방문자 수", value=user, delta=user_check(date))
+
+    
 
 
 
