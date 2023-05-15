@@ -1,6 +1,6 @@
 import streamlit as st
 
-
+user = 0
 
 
 
@@ -53,13 +53,12 @@ def classification(compare_img):
         img3 = cv2.drawMatches(base_img, kp1, compare_img, kp2, matches[:10], None, flags=2)
         
         # Create a Streamlit image object from the OpenCV image
-        st.write(f"Base image shape: {base_img.shape}")
-        st.write(f"Compare image shape: {compare_img.shape}")
+        # st.write(f"Base image shape: {base_img.shape}")
+        # st.write(f"Compare image shape: {compare_img.shape}")
         img_bytes = cv2.imencode('.png', img3)[1].tobytes()
-        st.image(Image.open(io.BytesIO(img_bytes)), caption=f'Matched Image #{i+1} (similarity score: {similarity:.2f})')
+        st.image(Image.open(io.BytesIO(img_bytes)), caption=f'비슷한 이미지 #{i+1} (유사도: {similarity:.2f})')
 
     
-
 
 
 
@@ -70,7 +69,8 @@ def classification(compare_img):
 
 def intro():
     import streamlit as st
-    
+    global user
+    user = user +1
     st.write("# 피부암 검사를 위한 페이지에 온것을 환영합니다👨‍⚕️")
     st.markdown("""
     **👈 사이드바를 클릭해서** 더 많은 정보를 확인하세요!
@@ -91,9 +91,24 @@ def intro():
         - big thanks 
         - 새로운거
 
-     
+
         """)
-    
+    def user_check(user):
+        if user / 5 == 0:
+            return 5
+        else:
+            return user
+    st.metric(label="방문자 수", value=user, delta=user_check(user))
+    st.info("# 오류 제보하기 ")
+    def on_submit():
+        title = st.session_state.title
+        details = st.session_state.details
+        st.write(f"title: {title}, details: {details}")
+
+    with st.form(key="my_form"):
+        st.text_input("제목", key="title")
+        st.text_area("내용", key="details")
+        st.form_submit_button("제출하기", on_click=on_submit, type= "primary")
 
 
 
@@ -195,24 +210,22 @@ def testing():
         resized_image = resize_image(image)
         input_data = np.expand_dims(resized_image, axis=0).astype(np.float32)
         interpreter.set_tensor(input_details[0]['index'], input_data)
-        num_iterations = 100
-        progress_bar = st.progress(0)
+        
+        
+        
         # Run inference
         with st.spinner('Classifying...'):
             start_time = time.time()
-            for i in tqdm(range(num_iterations)):
-                # Update the progress bar every iteration
-                progress_percent = int((i + 1) / num_iterations * 100)
-                progress_bar.progress(progress_percent)
-                progress_bar_text = f'{progress_percent}%'
-                progress_bar.text(progress_bar_text)
+            interpreter.invoke()
             end_time = time.time()
-        progress_bar.empty()
+            
+        
         # Calculate the classification duration
         classifying_duration = end_time - start_time
-
+       
         # Get the output probabilities
         output_data = interpreter.get_tensor(output_details[0]['index'])
+        
 
         return output_data[0], classifying_duration
 
@@ -222,29 +235,63 @@ def testing():
     from PIL import Image
     from urllib.error import URLError
 
-       # Get the input image from the user
-    image = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
     
-    
-    # Show the input image
-    if image is not None:
-        image = np.array(Image.open(image).convert("RGB"))
-        preresize = image
-        st.image(image, width=150)
 
-        # Run inference on the input image
-        probs, classifying_duration = classify_image(image)
+    st.warning("이미지 제출 방식을 골라주세요")
 
-        # Display the classification duration
-        st.write(f"Classification duration: {classifying_duration:.4f} seconds")
+    upload = st.checkbox("파일 업로드하기")
+    take = st.checkbox("사진 찍기")
+    if upload:
+        image = st.file_uploader(label="파일 업로드하기", type=["jpg", "jpeg", "png"])
+        if image is not None:
+            image = np.array(Image.open(image).convert("RGB"))
+            preresize = image
+            st.image(image, width=150)
 
-        # Display the top 3 predictions
-        top_3_indices = np.argsort(probs)[::-1][:3]
-        st.write("Top 3 predictions:")
-        for i in range(3):
-            st.write("%d. %s (%.2f%%)" % (i + 1, labels[top_3_indices[i]], probs[top_3_indices[i]] * 100))
-        classification(preresize)
+            # Run inference on the input image
+            probs, classifying_duration = classify_image(image)
+
+            
+            # Display the classification duration
+            st.success(f"소요 시간: {classifying_duration:.4f} 초")
+
+            # Display the top 3 predictions
+            top_3_indices = np.argsort(probs)[::-1][:3]
+            
+            st.write("피부암으로 추정되는 3개의 증상:")
+            for i in range(3):
+                st.write("%d. %s (%.2f%%)" % (i + 1, labels[top_3_indices[i]], probs[top_3_indices[i]] * 100))
+            st.divider()
+            st.code("유사점 비교", language='python')
+            
+            classification(preresize)
+    elif take:
+        image = st.camera_input(label="사진 찍기", help="웹캠 지원")
+        if image is not None:
+            image = np.array(Image.open(image).convert("RGB"))
+            preresize = image
+            st.image(image, width=150)
+
+            # Run inference on the input image
+            probs, classifying_duration = classify_image(image)
+
+            
+            # Display the classification duration
+            st.success(f"소요 시간: {classifying_duration:.4f} 초")
+
+            # Display the top 3 predictions
+            top_3_indices = np.argsort(probs)[::-1][:3]
+            
+            st.write("피부암으로 추정되는 3개의 증상:")
+            for i in range(3):
+                st.write("%d. %s (%.2f%%)" % (i + 1, labels[top_3_indices[i]], probs[top_3_indices[i]] * 100))
+            st.subheader("#유사점 비교")
+            classification(preresize)
+
+
         
+
+    
 
 page_names_to_funcs = {
     "홈": intro,
