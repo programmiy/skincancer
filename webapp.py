@@ -145,7 +145,7 @@ def intro():
         file_path = os.path.join(error_submit, f"{title}.txt")
         if not os.path.exists(file_path):
             with open(file_path, "w", encoding="UTF-8") as f:
-                f.write(encode)
+                f.write(details)
     
 
 
