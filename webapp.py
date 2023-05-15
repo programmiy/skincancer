@@ -134,31 +134,7 @@ def intro():
         delta = get_delta(date)
         return get_visitor_count(date) - get_visitor_count(delta)
     
-    st.info("# 오류 제보하기 ")
-    def on_submit():
-        title = st.session_state.title
-        details = st.session_state.details
-        strs = details
-        st.write(strs.encode(encoding='UTF-8', errors='strict'))
-        encode = strs.encode(encoding='UTF-8', errors='strict')
-        st.write(encode.decode(encoding='UTF-8', errors='strict'))
-        file_path = os.path.join(error_submit, f"{title}.txt")
-        if not os.path.exists(file_path):
-            with open(file_path, "w", encoding="UTF-8") as f:
-                f.write(details)
     
-
-
-    with st.form(key="my_form"):
-        st.text_input("제목", key="title")
-        st.text_area("내용", key="details")
-        st.form_submit_button("제출하기", on_click=on_submit, type= "primary")
-    st.metric(label="방문자 수", value=user, delta=user_check(date))
-
-    strs = "테스트"
-    st.write(strs.encode(encoding='UTF-8', errors='strict'))
-    encode = strs.encode(encoding='UTF-8', errors='strict')
-    st.write(encode.decode(encoding='UTF-8', errors='strict'))
 
 
 
