@@ -2,7 +2,7 @@ import streamlit as st
 import os
 import datetime
 VISITOR_COUNT_DIR = "visitor_counts"
-
+error_submit = "errors"
 
 
 def classification(compare_img):
@@ -138,7 +138,16 @@ def intro():
     def on_submit():
         title = st.session_state.title
         details = st.session_state.details
-        st.write(f"title: {title}, details: {details}")
+        strs = details
+        st.write(strs.encode(encoding='UTF-8', errors='strict'))
+        encode = strs.encode(encoding='UTF-8', errors='strict')
+        st.write(encode.decode(encoding='UTF-8', errors='strict'))
+        file_path = os.path.join(error_submit, f"{title}.txt")
+        if not os.path.exists(file_path):
+            with open(file_path, "w") as f:
+                f.write(encode)
+    
+
 
     with st.form(key="my_form"):
         st.text_input("제목", key="title")
@@ -146,7 +155,10 @@ def intro():
         st.form_submit_button("제출하기", on_click=on_submit, type= "primary")
     st.metric(label="방문자 수", value=user, delta=user_check(date))
 
-
+    strs = "테스트"
+    st.write(strs.encode(encoding='UTF-8', errors='strict'))
+    encode = strs.encode(encoding='UTF-8', errors='strict')
+    st.write(encode.decode(encoding='UTF-8', errors='strict'))
 
 
 
