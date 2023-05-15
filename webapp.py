@@ -1,6 +1,7 @@
 import streamlit as st
-
-user = 0
+import os
+import datetime
+VISITOR_COUNT_DIR = "visitor_counts"
 
 
 
@@ -61,6 +62,9 @@ def classification(compare_img):
     
 
 
+def get_current_date():
+    now = datetime.datetime.now()
+    return now.strftime("%Y-%m-%d")
 
 
 
@@ -69,8 +73,20 @@ def classification(compare_img):
 
 def intro():
     import streamlit as st
-    global user
-    user = user +1
+    def increase_visitor_count():
+        current_date = get_current_date()
+        file_path = os.path.join(VISITOR_COUNT_DIR, f"{current_date}.txt")
+
+        if not os.path.exists(file_path):
+            with open(file_path, "w") as f:
+                f.write("0")
+
+        with open(file_path, "r+") as f:
+            count = int(f.read())
+            count += 1
+            f.seek(0)
+            f.write(str(count))
+    increase_visitor_count()
     st.write("# 피부암 검사를 위한 페이지에 온것을 환영합니다👨‍⚕️")
     st.markdown("""
     **👈 사이드바를 클릭해서** 더 많은 정보를 확인하세요!
@@ -93,12 +109,31 @@ def intro():
 
 
         """)
-    def user_check(user):
-        if user / 5 == 0:
-            return 5
-        else:
-            return user
-    st.metric(label="방문자 수", value=user, delta=user_check(user))
+    def get_visitor_count(date):
+        file_path = os.path.join(VISITOR_COUNT_DIR, f"{date}.txt")
+
+        if not os.path.exists(file_path):
+            return 0
+
+        with open(file_path, "r") as f:
+            count = int(f.read())
+            return count
+    
+    date = get_current_date()   
+    user = get_visitor_count(date)
+    now = datetime.datetime.now()
+    
+    def get_delta(now):
+        now = datetime.datetime.now()
+        delta = now - datetime.timedelta(days= 1)
+        delta = delta.strftime("%Y-%m-%d")
+        
+        return delta
+        
+    def user_check(date):
+        delta = get_delta(date)
+        return get_visitor_count(date) - get_visitor_count(delta)
+    
     st.info("# 오류 제보하기 ")
     def on_submit():
         title = st.session_state.title
@@ -109,7 +144,7 @@ def intro():
         st.text_input("제목", key="title")
         st.text_area("내용", key="details")
         st.form_submit_button("제출하기", on_click=on_submit, type= "primary")
-
+    st.metric(label="방문자 수", value=user, delta=user_check(date))
 
 
 
