@@ -104,9 +104,7 @@ def intro():
         ### 페이지 제작 도움 크레딧
 
         - Check out [streamlit.io](https://streamlit.io)
-        - big thanks 
-        - 새로운거
-
+        
 
         """)
     def get_visitor_count(date):
