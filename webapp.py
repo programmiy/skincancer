@@ -285,7 +285,7 @@ def testing():
             # Display the top 3 predictions
             top_3_indices = np.argsort(probs)[::-1][:3]
             
-            st.write("피부암으로 추정되는 3개의 증상:")
+            st.write("예측되는 상위 3개의 징후:")
             for i in range(3):
                 st.write("%d. %s (%.2f%%)" % (i + 1, labels[top_3_indices[i]], probs[top_3_indices[i]] * 100))
             st.subheader("#유사점 비교")
