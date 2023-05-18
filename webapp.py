@@ -234,7 +234,7 @@ def testing():
         return output_data[0], classifying_duration
 
     # Define the labels for the 7 classes
-    labels = ['akiec', 'bcc', 'bkl', 'df', 'mel', 'nv', 'vasc']
+    labels = ['편평 세포암', '기저 세포암', '양성 각화증', '피부 섬유종', '흑색종', '멜라닌 세포 모반', '혈관 병변증']
 
     from PIL import Image
     from urllib.error import URLError
