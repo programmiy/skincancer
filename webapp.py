@@ -2,13 +2,13 @@ import streamlit as st
 import os
 import datetime
 VISITOR_COUNT_DIR = "visitor_counts"
-error_submit = "errors"
+
 
 
 def classification(compare_img):
     import numpy as np
     import cv2
-    from matplotlib import pyplot as plt
+    
     import glob
     import io
     from PIL import Image
@@ -57,7 +57,7 @@ def classification(compare_img):
         # st.write(f"Base image shape: {base_img.shape}")
         # st.write(f"Compare image shape: {compare_img.shape}")
         img_bytes = cv2.imencode('.png', img3)[1].tobytes()
-        st.image(Image.open(io.BytesIO(img_bytes)), caption=f'비슷한 이미지 #{i+1} (유사도: {similarity:.2f})')
+        st.image(Image.open(io.BytesIO(img_bytes)), caption=f'비슷한 이미지 #{i+1} (유사도: {similarity:.2f})') # 비활성화
 
     
 
@@ -93,7 +93,7 @@ def intro():
     """)
     st.sidebar.success("원하는 정보를 확인하세요")
     code = '''powered by Streamlit'''
-    st.code(code, language='java')
+    st.code(code, language='python')
     st.subheader("⚠️ 의학적 지식을 대체하는 것이 아닙니다 ")
     st.subheader("⚠️ 잠재적인 피부 문제를 쉽게 파악하는 도움을 받을 수 있도록 돕는 도구라는 점에 유의해야 합니다")
     st.markdown(
@@ -152,8 +152,7 @@ def usage():
 
 def based_information():
     import streamlit as st
-    import time
-    import numpy as np
+    
     
     st.markdown(f'# {list(page_names_to_funcs.keys())[1]}')
     
@@ -167,27 +166,20 @@ def based_information():
     st.write("- ['혈관 병변'](https://en.wikipedia.org/wiki/Vascular_anomaly) ")
     st.write(" ")
 
-    # Streamlit widgets automatically run the script from top to bottom. Since
-    # this button is not connected to any other logic, it just causes a plain
-    # rerun.
-    
+
 
 
 def testing():
     import streamlit as st
-    import pandas as pd
-    import altair as alt
+    
     import time
     import tensorflow as tf
-    from tqdm import tqdm
+    
     import numpy as np
-    import pandas as pd 
+    
 
 
-    # Measure Latency
-    #18.155.181.8
-    #35.201.127.49:443
-    #192.168.18.6:8501
+
 
     # Load TensorFlow Lite model
     interpreter = tf.lite.Interpreter(model_path="mobilenet_v1_1.0_224_quant.tflite")
@@ -260,7 +252,7 @@ def testing():
             # Display the top 3 predictions
             top_3_indices = np.argsort(probs)[::-1][:3]
             
-            st.write("피부암으로 추정되는 3개의 증상:")
+            st.write("예측되는 상위 3개의 징후:")
             for i in range(3):
                 st.write("%d. %s (%.2f%%)" % (i + 1, labels[top_3_indices[i]], probs[top_3_indices[i]] * 100))
             st.divider()
@@ -273,7 +265,7 @@ def testing():
         if image is not None:
             image = np.array(Image.open(image).convert("RGB"))
             preresize = image
-            st.image(image, width=150)
+            st.image(image, width=150) # 비활성화
 
             # Run inference on the input image
             probs, classifying_duration = classify_image(image)
@@ -292,6 +284,8 @@ def testing():
             classification(preresize)
             st.button("다시보기")
 
+            # 다운로드
+
         
 
     
@@ -303,5 +297,5 @@ page_names_to_funcs = {
     "검사하기": testing
 }
 
-demo_name = st.sidebar.selectbox("원하는 페이지를 고르세요", page_names_to_funcs.keys())
-page_names_to_funcs[demo_name]()
+page_name = st.sidebar.selectbox("원하는 페이지를 고르세요", page_names_to_funcs.keys())
+page_names_to_funcs[page_name]()
