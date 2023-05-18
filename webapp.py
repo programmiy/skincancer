@@ -216,7 +216,7 @@ def testing():
         
         
         # Run inference
-        with st.spinner('Classifying...'):
+        with st.spinner('분석 중...'):
             start_time = time.time()
             interpreter.invoke()
             end_time = time.time()
