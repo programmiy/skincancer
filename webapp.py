@@ -132,7 +132,10 @@ def intro():
         
     def user_check(date):
         delta = get_delta(date)
-        return get_visitor_count(date) - get_visitor_count(delta)
+        if get_visitor_count(date) - get_visitor_count(delta) < 0:
+            return 0
+        else:
+            return get_visitor_count(date) - get_visitor_count(delta)
     
     
     st.metric(label="방문자 수", value=user, delta=user_check(date))
@@ -146,16 +149,8 @@ def intro():
 def usage():
     import streamlit as st
     
-    st.write ("6.	The application also measures the latency or response time for the model to classify the image, and displays it to the user.")
-    st.write("Please note that this model still has room for academic revision as it can only classify the following 7 classes")
-    st.write("- ['akiec'](https://en.wikipedia.org/wiki/Squamous-cell_carcinoma) - squamous cell carcinoma (actinic keratoses dan intraepithelial carcinoma),")
-    st.write("- ['bcc'](https://en.wikipedia.org/wiki/Basal-cell_carcinoma) - basal cell carcinoma,")
-    st.write("- ['bkl'](https://en.wikipedia.org/wiki/Seborrheic_keratosis) - benign keratosis (serborrheic keratosis),")
-    st.write("- ['df'](https://en.wikipedia.org/wiki/Dermatofibroma) - dermatofibroma, ")
-    st.write("- ['nv'](https://en.wikipedia.org/wiki/Melanocytic_nevus) - melanocytic nevus, ")
-    st.write("- ['mel'](https://en.wikipedia.org/wiki/Melanoma) - melanoma,")
-    st.write("- ['vasc'](https://en.wikipedia.org/wiki/Vascular_anomaly) - vascular skin (Cherry Angiomas, Angiokeratomas, Pyogenic Granulomas.)")
-    st.write("Due to imperfection of the model and a room of improvement for the future, if the probabilities shown are less than 70%, the skin is either healthy or the input image is unclear. This means that the model can be the first diagnostic of your skin illness. As precautions for your skin illness, it is better to do consultation with dermatologist. ")
+
+    st.write("사용법 소개")
 
 def based_information():
     import streamlit as st
@@ -163,38 +158,21 @@ def based_information():
     import numpy as np
     
     st.markdown(f'# {list(page_names_to_funcs.keys())[1]}')
-    st.write(
-        """
-        This demo illustrates a combination of plotting and animation with
-Streamlit. We're generating a bunch of random numbers in a loop for around
-5 seconds. Enjoy!
-"""
-    )
-
-    progress_bar = st.sidebar.progress(0)
-    status_text = st.sidebar.empty()
-    last_rows = np.random.randn(1, 1)
-    chart = st.line_chart(last_rows)
     
-   
-        
-
-    
-
-    for i in range(1, 101):
-        new_rows = last_rows[-1, :] + np.random.randn(5, 1).cumsum(axis=0)
-        status_text.text("%i%% Complete" % i)
-        chart.add_rows(new_rows)
-        progress_bar.progress(i)
-        last_rows = new_rows
-        time.sleep(0.05)
-
-    progress_bar.empty()
+    st.header("이 앱에서 판별 가능한 암의 종류들")
+    st.write("- ['편평 세포암'](https://en.wikipedia.org/wiki/Squamous-cell_carcinoma) ")
+    st.write("- ['기저 세포암'](https://en.wikipedia.org/wiki/Basal-cell_carcinoma) ")
+    st.write("- ['양성 각화증'](https://en.wikipedia.org/wiki/Seborrheic_keratosis) ")
+    st.write("- ['피부 섬유종'](https://en.wikipedia.org/wiki/Dermatofibroma)  ")
+    st.write("- ['멜라닌 세포 모반'](https://en.wikipedia.org/wiki/Melanocytic_nevus)  ")
+    st.write("- ['흑색종'](https://en.wikipedia.org/wiki/Melanoma) ")
+    st.write("- ['혈관 병변'](https://en.wikipedia.org/wiki/Vascular_anomaly) ")
+    st.write(" ")
 
     # Streamlit widgets automatically run the script from top to bottom. Since
     # this button is not connected to any other logic, it just causes a plain
     # rerun.
-    st.button("다시보기")
+    
 
 
 def testing():
@@ -291,6 +269,7 @@ def testing():
             st.code("유사점 비교", language='python')
             
             classification(preresize)
+            st.button("다시보기")
     elif take:
         image = st.camera_input(label="사진 찍기", help="웹캠 지원")
         if image is not None:
@@ -313,7 +292,7 @@ def testing():
                 st.write("%d. %s (%.2f%%)" % (i + 1, labels[top_3_indices[i]], probs[top_3_indices[i]] * 100))
             st.subheader("#유사점 비교")
             classification(preresize)
-
+            st.button("다시보기")
 
         
 

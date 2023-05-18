@@ -1,0 +1,9 @@
+show_image = st.checkbox('이미지 보기')
+
+if show_image:
+    # 이미지를 보여줄 코드
+    image = Image.open('your_image.jpg')
+    st.image(image, caption='이미지 캡션')
+else:
+    # 이미지를 가릴 코드
+    st.write('이미지를 가리는 중...')
