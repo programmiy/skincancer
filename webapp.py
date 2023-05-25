@@ -62,7 +62,7 @@ def download(preresize):
     current_date = get_current_date()
     pdf = canvas.Canvas('유사도 분석 결과'+ ' ' +f'{current_date}.pdf')
 
-    pdfmetrics.registerFont(TTFont('a조약돌', r'C:\windows\fonts\a조약돌.TTF'))
+    pdfmetrics.registerFont(TTFont('SUITE', r'SUITE-Light.ttf'))
 
     # Set the page dimensions
     page_width = 595.276  # A4 page width in points
@@ -151,7 +151,7 @@ def fill_pdf(preresize, pdf, page_square, image_square, image_coordinate):
 
         # Add the caption below the image
         caption = f'비슷한 이미지 #{i+1} (유사도: {similarity:.2f})'
-        pdf.setFont('a조약돌', 12)  # Use the registered custom font
+        pdf.setFont('SUITE', 12)  # Use the registered custom font
         caption_width = pdf.stringWidth(caption, 'a조약돌', 12)
         caption_x = (page_width - caption_width) / 2
         pdf.drawString(caption_x, caption_y, caption)
