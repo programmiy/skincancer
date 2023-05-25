@@ -167,8 +167,8 @@ def fill_pdf(preresize, pdf, page_square, image_square, image_coordinate):
     
     st.code("다운로드가 시작됩니다.", language= 'java')
     # Save the PDF file
-    pdf.save()
-
+    pdf = pdf.save()
+    st.download_button(data= pdf)
 
 
 
