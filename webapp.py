@@ -152,7 +152,7 @@ def fill_pdf(preresize, pdf, page_square, image_square, image_coordinate):
         # Add the caption below the image
         caption = f'비슷한 이미지 #{i+1} (유사도: {similarity:.2f})'
         pdf.setFont('SUITE', 12)  # Use the registered custom font
-        caption_width = pdf.stringWidth(caption, 'a조약돌', 12)
+        caption_width = pdf.stringWidth(caption, 'SUITE', 12)
         caption_x = (page_width - caption_width) / 2
         pdf.drawString(caption_x, caption_y, caption)
 
