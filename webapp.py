@@ -123,6 +123,7 @@ def get_current_date():
 
 def intro():
     import streamlit as st
+    
     def increase_visitor_count():
         current_date = get_current_date()
         file_path = os.path.join(VISITOR_COUNT_DIR, f"{current_date}.txt")
