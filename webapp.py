@@ -3,6 +3,8 @@ from cv2 import normalize
 import streamlit as st
 import os
 import datetime
+
+import streamlit as st
 VISITOR_COUNT_DIR = "visitor_counts"
 
 
@@ -155,6 +157,10 @@ def intro():
         
 
         """)
+    
+    from streamlit_extras.badges import badge
+
+    badge(type="github", name="programmiy/skincancer")
     def get_visitor_count(date):
         file_path = os.path.join(VISITOR_COUNT_DIR, f"{date}.txt")
 
@@ -396,4 +402,7 @@ page_names_to_funcs = {
 }
 
 page_name = st.sidebar.selectbox("원하는 페이지를 고르세요", page_names_to_funcs.keys())
+
+
+
 page_names_to_funcs[page_name]()
