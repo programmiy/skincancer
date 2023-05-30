@@ -48,7 +48,8 @@ def classification(compare_img):
     # get top 5 matches
     top_matches = matches_data[:5]
 
-
+    imgarray = []
+    similarity_list = []
     # Generate HTML content for download
     html_content = "<html><body>"
     for i, (img_path, similarity) in enumerate(top_matches):
@@ -61,11 +62,15 @@ def classification(compare_img):
 
         img3 = cv2.drawMatches(base_img, kp1, compare_img, kp2, matches[:10], None, flags=2)
         img3_rgb = cv2.cvtColor(img3, cv2.COLOR_BGR2RGB)
+        
+        
 
         # Save the image as BytesIO object
         img_bytes = io.BytesIO()
         Image.fromarray(img3_rgb).save(img_bytes, format='PNG')
         img_data = img_bytes.getvalue()
+        imgarray.append(img_bytes)
+        similarity_list.append(similarity)
 
         # Add the image to the HTML content
         html_content += f"<h3>비슷한 이미지 #{i+1} (유사도: {similarity:.2f})</h3>"
@@ -74,7 +79,9 @@ def classification(compare_img):
     html_content += "</body></html>"
 
     # Download button
-    st.download_button("Download Results", data=html_content, file_name="classification_results.html", mime="text/html")
+    st.download_button("결과를 html로 다운로드 받기 ", data=html_content, file_name="분석 결과.html", mime="text/html")
+
+    return  imgarray, similarity_list
 
 
 
@@ -217,7 +224,7 @@ def testing():
     import tensorflow as tf
     
     import numpy as np
-    
+    import imgkit
 
 
 
@@ -321,8 +328,8 @@ def testing():
 
             
             # Display the classification duration
-            st.success(f"소요 시간: {classifying_duration:.4f} 초")
-
+            st.success(f"소요 시간: {classifying_duration:.4f} 초", icon="✅")
+            
             # Display the top 3 predictions
             top_3_indices = np.argsort(probs)[::-1][:3]
             
@@ -355,10 +362,27 @@ def testing():
             st.write("예측되는 상위 3개의 징후:")
             for i in range(3):
                 st.write("%d. %s (%.2f%%)" % (i + 1, labels[top_3_indices[i]], probs[top_3_indices[i]] * 100))
-            st.subheader("#유사점 비교")
-            classification(preresize)
-            st.button("다시보기")
+            with st.expander("유사점 비교해보기 "):
+            
+                st.header("유사점 비교")
+                imgarray, similarity_list = classification(preresize)
+                
+                # Convert HTML to image using imgkit
+                
 
+                wannasee = st.button("결과 직접 보기")
+                if wannasee:
+                    
+                    collapse(imgarray, similarity_list)
+                
+            st.button("다시보기")
+def collapse(imgarray, similarity_list):
+    import io
+    from PIL import Image
+    i = 0
+    for img_bytes, similarity in zip(imgarray, similarity_list):
+        st.image(Image.open(img_bytes), caption=f'비슷한 이미지 #{i+1} (유사도: {similarity:.2f})')
+        i +=1 
             # 다운로드
 
         
