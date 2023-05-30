@@ -146,17 +146,22 @@ def intro():
     st.code(code, language='java')
     st.subheader("⚠️ 의학적 지식을 대체하는 것이 아닙니다 ")
     st.subheader("⚠️ 잠재적인 피부 문제를 쉽게 파악하는 도움을 받을 수 있도록 돕는 도구라는 점에 유의해야 합니다")
-    st.markdown(
+
+    from markdownlit import mdlit
+
+    st.success("제작에 도움을 준 사이트들")
+    mdlit(
         """
+페이지 제작 도움 크레딧
 
-        
+Check out 
+[streamlit.io]
 
-        ### 페이지 제작 도움 크레딧
+@(https://streamlit.io)
 
-        - Check out [streamlit.io](https://streamlit.io)
-        
+@(https://huggingface.co/ilhamstoked)
 
-        """)
+""")
     
     from streamlit_extras.badges import badge
 
