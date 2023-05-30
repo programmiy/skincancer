@@ -14,10 +14,15 @@ def classification(compare_img):
     import glob
     import io
     from PIL import Image
-
+    from reportlab.pdfgen import canvas
+    from reportlab.pdfgen import canvas
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+    import base64
     img_list = glob.glob('cancer/*.jpg')
     compare_img = np.array(compare_img)
     compare_img = cv2.cvtColor(compare_img, cv2.COLOR_RGB2BGR) 
+    
 
     orb = cv2.ORB_create()
     kp2, des2 = orb.detectAndCompute(compare_img, None)
@@ -43,56 +48,9 @@ def classification(compare_img):
     # get top 5 matches
     top_matches = matches_data[:5]
 
-    return top_matches, orb, des2, compare_img, kp2, matches_data
 
-def download(preresize):
-    import numpy as np
-    import cv2
-    
-    import glob
-    import io
-    from PIL import Image
-
-    from reportlab.pdfgen import canvas
-    from reportlab.pdfgen import canvas
-    from reportlab.pdfbase import pdfmetrics
-    from reportlab.pdfbase.ttfonts import TTFont
-    # Create a PDF canvas
-
-    current_date = get_current_date()
-    pdf = canvas.Canvas('유사도 분석 결과'+ ' ' +f'{current_date}.pdf')
-
-    pdfmetrics.registerFont(TTFont('SUITE', r'SUITE-Light.ttf'))
-
-    # Set the page dimensions
-    page_width = 595.276  # A4 page width in points
-    page_height = 841.890  # A4 page height in points
-
-    # Calculate the image and caption positions
-    image_width = 400
-    image_height = 300
-    image_x = (page_width - image_width) / 2
-    image_y = (page_height - image_height) / 2
-    # caption_y = image_y - 20
-    page_square = page_width, page_height
-    image_square = image_width, image_height
-    image_coordinate = image_x, image_y
-    fill_pdf(preresize, pdf, page_square, image_square, image_coordinate)
-
-    
-
-
-def wannasee(preresize):
-    import numpy as np
-    import cv2
-    
-    import glob
-    import io
-    from PIL import Image
-    preresize = preresize
-    result = classification(preresize)
-    top_matches, orb, des2, compare_img, kp2, matches_data = result
-
+    # Generate HTML content for download
+    html_content = "<html><body>"
     for i, (img_path, similarity) in enumerate(top_matches):
         base_img = cv2.imread(img_path)
         kp1, des1 = orb.detectAndCompute(base_img, None)
@@ -102,75 +60,45 @@ def wannasee(preresize):
         matches = sorted(matches, key=lambda x: x.distance)
 
         img3 = cv2.drawMatches(base_img, kp1, compare_img, kp2, matches[:10], None, flags=2)
-            
-        # Create a Streamlit image object from the OpenCV image
-        # st.write(f"Base image shape: {base_img.shape}")
-        # st.write(f"Compare image shape: {compare_img.shape}")
-        img_bytes = cv2.imencode('.png', img3)[1].tobytes()
-        st.image(Image.open(io.BytesIO(img_bytes)), caption=f'비슷한 이미지 #{i+1} (유사도: {similarity:.2f})') # 비활성화
+        img3_rgb = cv2.cvtColor(img3, cv2.COLOR_BGR2RGB)
+
+        # Save the image as BytesIO object
+        img_bytes = io.BytesIO()
+        Image.fromarray(img3_rgb).save(img_bytes, format='PNG')
+        img_data = img_bytes.getvalue()
+
+        # Add the image to the HTML content
+        html_content += f"<h3>비슷한 이미지 #{i+1} (유사도: {similarity:.2f})</h3>"
+        html_content += f"<img src='data:image/png;base64,{base64.b64encode(img_data).decode()}'/><br><br>"
+
+    html_content += "</body></html>"
+
+    # Download button
+    st.download_button("Download Results", data=html_content, file_name="classification_results.html", mime="text/html")
+
+
+
+    # # Display the matched images
+    # for i, (img_path, similarity) in enumerate(top_matches):
+    #     base_img = cv2.imread(img_path)
+    #     kp1, des1 = orb.detectAndCompute(base_img, None)
+
+    #     bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+    #     matches = bf.match(des1, des2)
+    #     matches = sorted(matches, key=lambda x: x.distance)
+
+    #     img3 = cv2.drawMatches(base_img, kp1, compare_img, kp2, matches[:10], None, flags=2)
+        
+    #     # Create a Streamlit image object from the OpenCV image
+    #     # st.write(f"Base image shape: {base_img.shape}")
+    #     # st.write(f"Compare image shape: {compare_img.shape}")
+    #     img_bytes = cv2.imencode('.png', img3)[1].tobytes()
+    #     st.image(Image.open(io.BytesIO(img_bytes)), caption=f'비슷한 이미지 #{i+1} (유사도: {similarity:.2f})') # 비활성화
 
 
        
-def fill_pdf(preresize, pdf, page_square, image_square, image_coordinate):
-    import numpy as np
-    import cv2
-    
-    import glob
-    import io
-    from PIL import Image
-    result = classification(preresize)
-    top_matches, orb, des2, compare_img, kp2, matches_data = result
-    # Display the matched images
-    for i, (img_path, similarity) in enumerate(top_matches):
-        base_img = cv2.imread(img_path)
-        kp1, des1 = orb.detectAndCompute(base_img, None)
-
-        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
-        matches = bf.match(des1, des2)
-        matches = sorted(matches, key=lambda x: x.distance)
-
-        img3 = cv2.drawMatches(base_img, kp1, compare_img, kp2, matches[:10], None, flags=2)
-            
-        # Create a Streamlit image object from the OpenCV image
-        # st.write(f"Base image shape: {base_img.shape}")
-        # st.write(f"Compare image shape: {compare_img.shape}")
-        img_bytes = cv2.imencode('.png', img3)[1].tobytes()    
-        page_width, page_height = page_square
-        image_width, image_height = image_square
-        image_x, image_y = image_coordinate
-        caption_y = image_y - 20
-        # Convert OpenCV image to PIL image
-        pil_image = Image.fromarray(cv2.cvtColor(img3, cv2.COLOR_BGR2RGB))
-
-        # Save PIL image as a temporary file
-        temp_filename = f'temp_image_{i}.png'
-        pil_image.save(temp_filename)
-
-        # Add the image to the PDF canvas
-        pdf.drawInlineImage(temp_filename, image_x, image_y, width=image_width, height=image_height)
-
-        # Add the caption below the image
-        caption = f'비슷한 이미지 #{i+1} (유사도: {similarity:.2f})'
-        pdf.setFont('SUITE', 12)  # Use the registered custom font
-        caption_width = pdf.stringWidth(caption, 'SUITE', 12)
-        caption_x = (page_width - caption_width) / 2
-        pdf.drawString(caption_x, caption_y, caption)
-
-        # Delete the temporary file
-        os.remove(temp_filename)
-
-        # Add a new page if there are more images
-        if i < len(matches_data) - 1:
-            pdf.showPage()
         
-
-    
-    st.code("다운로드가 시작됩니다.", language= 'java')
-    # Save the PDF file
-    pdf = pdf.save()
-    st.download_button(data= pdf)
-
-
+        
 
 
 
@@ -427,15 +355,8 @@ def testing():
             st.write("예측되는 상위 3개의 징후:")
             for i in range(3):
                 st.write("%d. %s (%.2f%%)" % (i + 1, labels[top_3_indices[i]], probs[top_3_indices[i]] * 100))
-            st.subheader(":blue[유사도 비교] 아래 중복선택 가능")
-            
-
-            ws = st.checkbox("유사도 비교 결과 보기 :exclamation: 피부암 사진이 직접 노출됩니다.")
-            dl = st.checkbox("유사도 비교 결과 다운로드 하기 :exclamation: 피부암 사진이 직접 노출됩니다.")
-            if ws:    
-                wannasee(preresize)
-            if dl:
-                download(preresize)
+            st.subheader("#유사점 비교")
+            classification(preresize)
             st.button("다시보기")
 
             # 다운로드
