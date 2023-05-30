@@ -150,19 +150,27 @@ def intro():
     from markdownlit import mdlit
 
     st.success("제작에 도움을 준 사이트들")
+
     mdlit(
         """
-페이지 제작 도움 크레딧
 
-Check out 
-[streamlit.io]
+
+
 
 @(https://streamlit.io)
 
-@(https://huggingface.co/ilhamstoked)
+[orange]Inspired by[/orange] @(https://huggingface.co/ilhamstoked)
 
 """)
     
+
+    
+    mdlit(
+        """[blue]Our[/blue] [green]Repository[/green]      @(https://github.com/programmiy/skincancer)
+        """
+    )
+    
+
     from streamlit_extras.badges import badge
 
     badge(type="github", name="programmiy/skincancer")
@@ -195,11 +203,11 @@ Check out
             return get_visitor_count(date) - get_visitor_count(delta)
     
     
-    st.metric(label="방문자 수", value=user, delta=user_check(date))
+    st.metric(label="방문자 수", value=user, delta=user_check(date), help="하루 동안 이 사이트에 방문한 방문자 수입니다.")
 
+    from streamlit_extras.metric_cards import style_metric_cards
+    style_metric_cards()
     
-
-
 
 
 
@@ -211,19 +219,43 @@ def usage():
 
 def based_information():
     import streamlit as st
+    from markdownlit import mdlit
+
+
     
     
-    st.markdown(f'# {list(page_names_to_funcs.keys())[1]}')
     
+  
+
+    st.image('wikipedia.png', caption="Wikipedia")
     st.header("이 앱에서 판별 가능한 암의 종류들")
-    st.write("- ['편평 세포암'](https://en.wikipedia.org/wiki/Squamous-cell_carcinoma) ")
-    st.write("- ['기저 세포암'](https://en.wikipedia.org/wiki/Basal-cell_carcinoma) ")
-    st.write("- ['양성 각화증'](https://en.wikipedia.org/wiki/Seborrheic_keratosis) ")
-    st.write("- ['피부 섬유종'](https://en.wikipedia.org/wiki/Dermatofibroma)  ")
-    st.write("- ['멜라닌 세포 모반'](https://en.wikipedia.org/wiki/Melanocytic_nevus)  ")
-    st.write("- ['흑색종'](https://en.wikipedia.org/wiki/Melanoma) ")
-    st.write("- ['혈관 병변'](https://en.wikipedia.org/wiki/Vascular_anomaly) ")
-    st.write(" ")
+    # st.write(f"- 편평 세포암 {Squamous_cell}")
+    mdlit(
+        """- @([orange]편평 세포암[/orange])(https://en.wikipedia.org/wiki/Squamous-cell_carcinoma) ->  사마귀나 물집 등의 형태나 검은색 덩어리가 융기하여 나타나는 피부암
+        """
+    )
+    mdlit(
+        """- @([orange]기저 세포암[/orange])(https://en.wikipedia.org/wiki/Basal-cell_carcinoma) ->  피부 안에서 부터 발전하는 피부암, 기저층이나 모낭 등을 구성하는 세포가 악성화한 종양
+        """
+    )
+
+    mdlit(
+        """- @([orange]양성 각화증[/orange])(https://en.wikipedia.org/wiki/Seborrheic_keratosis) ->  검버섯이라고 부르는, 표피 각질층에 구성된 사마귀 모양의 흔한 피부양성종양이다. """
+    )
+    
+    mdlit(
+        """- @([orange]피부 섬유종[/orange])(https://en.wikipedia.org/wiki/Dermatofibroma) ->  피부가 상처가 난 뒤에 자주 발생하는 양성 종양 """
+    )
+    mdlit(
+        """- @([orange]멜라닌 세포 모반[/orange])(https://en.wikipedia.org/wiki/Melanocytic_nevus) ->  흑색종과 가장 비슷한 양성 종양 """
+    )
+    mdlit(
+        """- @([orange]흑색종[/orange])(https://en.wikipedia.org/wiki/Melanoma) -> 멜라닌 세포 모반이 비대칭이거나 경계가 뚜렷하지 않은 악성 종양  """
+    )
+    mdlit(
+        """- @([orange]혈관 병변[/orange])(https://en.wikipedia.org/wiki/Vascular_anomaly)  -> 모세혈관의 확장으로 생기는 병변, 피부암은 아니며  보라색, 자주색, 빨간색 등  색깔은 다양한 편"""
+    )
+
 
 
 
