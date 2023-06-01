@@ -135,7 +135,7 @@ def based_information():
     
   
 
-    st.image('wikipedia.png', caption="Wikipedia")
+    st.image('https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Wikipedia_wordmark.svg/600px-Wikipedia_wordmark.svg.png')
     st.header("이 앱에서 판별 가능한 암의 종류들")
     # st.write(f"- 편평 세포암 {Squamous_cell}")
     mdlit(
