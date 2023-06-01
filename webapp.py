@@ -119,11 +119,6 @@ def intro():
 
 
 
-def usage():
-
-    
-
-    st.write("사용법 소개")
 
 def based_information():
     
@@ -346,9 +341,14 @@ def compute_analysis(image): # 중복작업 일괄처리용
     # Display the top 3 predictions
     top_3_indices = np.argsort(probs)[::-1][:3]
             
+    st.warning("제시한 이미지가 편평 세포암, 기저 세포암, 양성 각화증, 피부 섬유종, 흑색종, 멜라닌 세포 모반, 혈관 병변증 중 어디에 속할지 나타납니다.")
+    st.warning("정상적인 피부도 위 7개 중의 하나로 결과가 도출됩니다.")
     st.write("예측되는 상위 3개의 징후:")
     for i in range(3):
         st.write("%d. %s (%.2f%%)" % (i + 1, labels[top_3_indices[i]], probs[top_3_indices[i]] * 100))
+    info = st.checkbox("나온 결과에 대한 정보가 궁금하다면?", value=False)
+    if info:
+        based_information()
     with st.expander("유사점 비교해보기 "):
             
         st.header("유사점 비교")
@@ -460,8 +460,7 @@ def classification(compare_img):
 
 page_names_to_funcs = {
     "홈": intro,
-    "피부암에 대한 기본 정보": based_information,
-    "사용법": usage,
+
     "검사하기": testing
 }
 
