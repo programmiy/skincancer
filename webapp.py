@@ -1,108 +1,15 @@
-import PIL
-from cv2 import normalize
+import time
 import streamlit as st
 import os
 import datetime
+import numpy as np
+import tensorflow as tf
+from PIL import Image
 
-import streamlit as st
 VISITOR_COUNT_DIR = "visitor_counts"
 
 
 
-def classification(compare_img):
-    import numpy as np
-    import cv2
-    
-    import glob
-    import io
-    from PIL import Image
-    from reportlab.pdfgen import canvas
-    from reportlab.pdfgen import canvas
-    from reportlab.pdfbase import pdfmetrics
-    from reportlab.pdfbase.ttfonts import TTFont
-    import base64
-    img_list = glob.glob('cancer/*.jpg')
-    compare_img = np.array(compare_img)
-    compare_img = cv2.cvtColor(compare_img, cv2.COLOR_RGB2BGR) 
-    
-
-    orb = cv2.ORB_create()
-    kp2, des2 = orb.detectAndCompute(compare_img, None)
-
-    matches_data = []
-    for img_path in img_list:
-        base_img = cv2.imread(img_path, 0)
-        
-        kp1, des1 = orb.detectAndCompute(base_img, None)
-
-        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
-        matches = bf.match(des1, des2)
-        if matches:
-            similarity = sum(match.distance for match in matches) / len(matches)
-        else:
-            similarity = 0
-
-        matches_data.append((img_path, similarity))
-
-    # sort matches by similarity score
-    matches_data.sort(key=lambda x: x[1], reverse=True)
-    
-    # get top 5 matches
-    top_matches = matches_data[:5]
-
-    imgarray = []
-    similarity_list = []
-    # Generate HTML content for download
-    html_content = "<html><body>"
-    for i, (img_path, similarity) in enumerate(top_matches):
-        base_img = cv2.imread(img_path)
-        kp1, des1 = orb.detectAndCompute(base_img, None)
-
-        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
-        matches = bf.match(des1, des2)
-        matches = sorted(matches, key=lambda x: x.distance)
-
-        img3 = cv2.drawMatches(base_img, kp1, compare_img, kp2, matches[:10], None, flags=2)
-        img3_rgb = cv2.cvtColor(img3, cv2.COLOR_BGR2RGB)
-        
-        
-
-        # Save the image as BytesIO object
-        img_bytes = io.BytesIO()
-        Image.fromarray(img3_rgb).save(img_bytes, format='PNG')
-        img_data = img_bytes.getvalue()
-        imgarray.append(img_bytes)
-        similarity_list.append(similarity)
-
-        # Add the image to the HTML content
-        html_content += f"<h3>비슷한 이미지 #{i+1} (유사도: {similarity:.2f})</h3>"
-        html_content += f"<img src='data:image/png;base64,{base64.b64encode(img_data).decode()}'/><br><br>"
-
-    html_content += "</body></html>"
-
-    # Download button
-    st.download_button("결과를 html로 다운로드 받기 ", data=html_content, file_name="분석 결과.html", mime="text/html")
-
-    return  imgarray, similarity_list
-
-
-
-    # # Display the matched images
-    # for i, (img_path, similarity) in enumerate(top_matches):
-    #     base_img = cv2.imread(img_path)
-    #     kp1, des1 = orb.detectAndCompute(base_img, None)
-
-    #     bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
-    #     matches = bf.match(des1, des2)
-    #     matches = sorted(matches, key=lambda x: x.distance)
-
-    #     img3 = cv2.drawMatches(base_img, kp1, compare_img, kp2, matches[:10], None, flags=2)
-        
-    #     # Create a Streamlit image object from the OpenCV image
-    #     # st.write(f"Base image shape: {base_img.shape}")
-    #     # st.write(f"Compare image shape: {compare_img.shape}")
-    #     img_bytes = cv2.imencode('.png', img3)[1].tobytes()
-    #     st.image(Image.open(io.BytesIO(img_bytes)), caption=f'비슷한 이미지 #{i+1} (유사도: {similarity:.2f})') # 비활성화
 
 
        
@@ -187,7 +94,7 @@ def intro():
     
     date = get_current_date()   
     user = get_visitor_count(date)
-    now = datetime.datetime.now()
+    
     
     def get_delta(now): #파라미터 없애기, 혹은  get_current_date 수정
         now = datetime.datetime.now()
@@ -213,13 +120,13 @@ def intro():
 
 
 def usage():
-    import streamlit as st
+
     
 
     st.write("사용법 소개")
 
 def based_information():
-    import streamlit as st
+    
     from markdownlit import mdlit
 
 
@@ -260,29 +167,6 @@ def based_information():
 
 
 
-
-def testing():
-    import streamlit as st
-    
-    import time
-    import tensorflow as tf
-    
-    import numpy as np
-    
-
-
-
-    # Load TensorFlow Lite model
-    interpreter = tf.lite.Interpreter(model_path="models/mobilenet_v1_1.0_224_quant.tflite")
-    interpreter.allocate_tensors()
-    interpreter = tf.lite.Interpreter(model_path="models/InceptionResNetV2Skripsi.tflite")
-    interpreter.allocate_tensors()
-
-    # Get input and output tensors
-    input_details = interpreter.get_input_details()
-    output_details = interpreter.get_output_details()
-
-
     # 이미지 업스케일링 
 
 
@@ -299,59 +183,90 @@ def testing():
     # replace upsc
 
 
-    def resize_image(image):
-        from PIL import Image
-        # Get the original image shape
-        original_shape = tf.shape(image)
-        
-        # Calculate the padding amounts
-        height_pad = (original_shape[0] - 150) // 2
-        width_pad = (original_shape[1] - 150) // 2
-        
-        # Pad the image
-        padded_image = tf.pad(image, [[height_pad, height_pad], [width_pad, width_pad], [0, 0]])
-        
-        # Resize the padded image to 150x150 pixels
-        resized_image = tf.image.resize(padded_image, [150, 150])
+def resize_image(image):
+    
+    """
+    Pads the input image and resizes it to 150x150 pixels.
 
-        
-        return resized_image
+    Args:
+        image (tf.Tensor): The input image tensor.
 
+    Returns:
+        tf.Tensor: The padded and resized image tensor.
 
-    # Define a function to run inference on the TensorFlow Lite model
-    def classify_image(image):
-        # Pre-process the input image
-        resized_image = resize_image(image)
-        
-
-        input_data = np.expand_dims(resized_image, axis=0).astype(np.float32)
-        interpreter.set_tensor(input_details[0]['index'], input_data)
-        
-        
-        
-        # Run inference
-        with st.spinner('분석 중...'):
-            start_time = time.time()
-            interpreter.invoke()
-            end_time = time.time()
-            
-        
-        # Calculate the classification duration
-        classifying_duration = end_time - start_time
-       
-        # Get the output probabilities
-        output_data = interpreter.get_tensor(output_details[0]['index'])
-        
-
-        return output_data[0], classifying_duration
-
-    # Define the labels for the 7 classes
-    labels = ['편평 세포암', '기저 세포암', '양성 각화증', '피부 섬유종', '흑색종', '멜라닌 세포 모반', '혈관 병변증']
-
-    from PIL import Image
-    from urllib.error import URLError
+    Raises:
+        ValueError: If the input image has a shape smaller than 150x150 pixels.
+    """
+    # Get the original image shape
+    original_shape = tf.shape(image)
+    
+    # Calculate the padding amounts
+    height_pad = (original_shape[0] - 150) // 2
+    width_pad = (original_shape[1] - 150) // 2
+    
+    # Pad the image
+    padded_image = tf.pad(image, [[height_pad, height_pad], [width_pad, width_pad], [0, 0]])
+    
+    # Resize the padded image to 150x150 pixels
+    resized_image = tf.image.resize(padded_image, [150, 150])
 
     
+    return resized_image
+
+    # Define a function to run inference on the TensorFlow Lite model
+def classify_image(image):
+        
+    """
+        Runs inference on the input image using the provided interpreter and model details.
+
+        Args:
+            image (numpy.ndarray): The input image array.
+            interpreter (tensorflow.lite.Interpreter): The TensorFlow Lite interpreter.
+            input_details (list): A list of input details dictionaries for the interpreter.
+            output_details (list): A list of output details dictionaries for the interpreter.
+
+        Returns:
+            tuple: A tuple containing the output probabilities and the classification duration.
+
+        Raises:
+            ValueError: If the input image has an invalid format or shape.
+        
+    """            
+        # Load TensorFlow Lite model
+    interpreter = tf.lite.Interpreter(model_path="models/mobilenet_v1_1.0_224_quant.tflite")
+    interpreter.allocate_tensors()
+    interpreter = tf.lite.Interpreter(model_path="models/InceptionResNetV2Skripsi.tflite")
+    interpreter.allocate_tensors()
+
+    # Get input and output tensors
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+    # Pre-process the input image
+    resized_image = resize_image(image)
+    
+
+    input_data = np.expand_dims(resized_image, axis=0).astype(np.float32)
+    interpreter.set_tensor(input_details[0]['index'], input_data)
+    
+    
+    
+    # Run inference
+    with st.spinner('분석 중...'):
+        start_time = time.time()
+        interpreter.invoke()
+        end_time = time.time()
+        
+    
+    # Calculate the classification duration
+    classifying_duration = end_time - start_time
+   
+    # Get the output probabilities
+    output_data = interpreter.get_tensor(output_details[0]['index'])
+    
+
+    return output_data[0], classifying_duration
+def testing():
+
 
     st.warning("이미지 제출 방식을 골라주세요")
 
@@ -360,75 +275,186 @@ def testing():
     if upload:
         image = st.file_uploader(label="파일 업로드하기", type=["jpg", "jpeg", "png"])
         if image is not None:
-            # image_upscailing(image)
-            image = np.array(Image.open(image).convert("RGB"))
-            preresize = image
-            st.code("작업에 사용된 이미지", language= "java")
-            st.image(image, width=150)
+            compute_analysis(image)
+            # # image_upscailing(image)
+            # image = np.array(Image.open(image).convert("RGB"))
+            # preresize = image
+            # st.code("작업에 사용된 이미지", language= "java")
+            # st.image(image, width=150)
 
-            # Run inference on the input image
-            probs, classifying_duration = classify_image(image)
+            # # Run inference on the input image
+            # probs, classifying_duration = classify_image(image)
 
             
-            # Display the classification duration
-            st.success(f"소요 시간: {classifying_duration:.4f} 초", icon="✅")
+            # # Display the classification duration
+            # st.success(f"소요 시간: {classifying_duration:.4f} 초", icon="✅")
             
-            # Display the top 3 predictions
-            top_3_indices = np.argsort(probs)[::-1][:3]
+            # # Display the top 3 predictions
+            # top_3_indices = np.argsort(probs)[::-1][:3]
             
-            st.write("예측되는 상위 3개의 징후:")
-            for i in range(3):
-                st.write("%d. %s (%.2f%%)" % (i + 1, labels[top_3_indices[i]], probs[top_3_indices[i]] * 100))
-            st.divider()
-            st.code("유사점 비교", language='python')
+            # st.write("예측되는 상위 3개의 징후:")
+            # for i in range(3):
+            #     st.write("%d. %s (%.2f%%)" % (i + 1, labels[top_3_indices[i]], probs[top_3_indices[i]] * 100))
+            # st.divider()
+            # st.code("유사점 비교", language='python')
             
-            classification(preresize)
-            st.button("다시보기")
+            # classification(preresize)
+                
+
     elif take:
         image = st.camera_input(label="사진 찍기", help="웹캠 지원")
         if image is not None:
-            
-            image = np.array(Image.open(image).convert("RGB"))
-            preresize = image
-            
+            compute_analysis(image)
 
-            # Run inference on the input image
-            probs, classifying_duration = classify_image(image)
-
-            
-            # Display the classification duration
-            st.success(f"소요 시간: {classifying_duration:.4f} 초")
-
-            # Display the top 3 predictions
-            top_3_indices = np.argsort(probs)[::-1][:3]
-            
-            st.write("예측되는 상위 3개의 징후:")
-            for i in range(3):
-                st.write("%d. %s (%.2f%%)" % (i + 1, labels[top_3_indices[i]], probs[top_3_indices[i]] * 100))
-            with st.expander("유사점 비교해보기 "):
-            
-                st.header("유사점 비교")
-                imgarray, similarity_list = classification(preresize)
-                
-                # Convert HTML to image using imgkit
-                
-
-                wannasee = st.button("결과 직접 보기")
-                if wannasee:
-                    
-                    collapse(imgarray, similarity_list)
-                
-            st.button("다시보기")
-def collapse(imgarray, similarity_list):
-    import io
-    from PIL import Image
+def collapse(img_bytes_array, similarity_list): # nested collapse
+    
+    
     i = 0
-    for img_bytes, similarity in zip(imgarray, similarity_list):
+    for img_bytes, similarity in zip(img_bytes_array, similarity_list):
         st.image(Image.open(img_bytes), caption=f'비슷한 이미지 #{i+1} (유사도: {similarity:.2f})')
         i +=1 
             # 다운로드
 
+def compute_analysis(image): # 중복작업 일괄처리용
+
+    """
+    Computes analysis for the input image, including classification and visual comparison.
+
+    Args:
+        image (str): The path to the input image.
+
+    Returns:
+        None
+    """    
+    import numpy as np
+    
+    from PIL import Image
+    # Define the labels for the 7 classes
+    labels = ['편평 세포암', '기저 세포암', '양성 각화증', '피부 섬유종', '흑색종', '멜라닌 세포 모반', '혈관 병변증']
         
+    image = np.array(Image.open(image).convert("RGB"))
+    preresize = image
+            
+
+    # Run inference on the input image
+    probs, classifying_duration = classify_image(image) # + upsc
+
+            
+    # Display the classification duration
+    st.success(f"소요 시간: {classifying_duration:.4f} 초", icon="✅")
+
+    # Display the top 3 predictions
+    top_3_indices = np.argsort(probs)[::-1][:3]
+            
+    st.write("예측되는 상위 3개의 징후:")
+    for i in range(3):
+        st.write("%d. %s (%.2f%%)" % (i + 1, labels[top_3_indices[i]], probs[top_3_indices[i]] * 100))
+    with st.expander("유사점 비교해보기 "):
+            
+        st.header("유사점 비교")
+        imgarray, similarity_list = classification(preresize)
+                
+                # Convert HTML to image using imgkit
+                
+
+        wannasee = st.button("결과 직접 보기")
+        if wannasee:
+                    
+            collapse(imgarray, similarity_list)
+                
+    st.button("다시보기")
+
+def classification(compare_img):
+    import numpy as np
+    import cv2
+    
+    import glob
+    import io
+    from PIL import Image
+
+    import base64
+    img_list = glob.glob('cancer/*.jpg')
+    compare_img = np.array(compare_img)
+    compare_img = cv2.cvtColor(compare_img, cv2.COLOR_RGB2BGR) 
+    
+
+    orb = cv2.ORB_create()
+    kp2, des2 = orb.detectAndCompute(compare_img, None)
+
+    matches_data = []
+    for img_path in img_list:
+        base_img = cv2.imread(img_path, 0)
+        
+        kp1, des1 = orb.detectAndCompute(base_img, None)
+
+        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+        matches = bf.match(des1, des2)
+        if matches:
+            similarity = sum(match.distance for match in matches) / len(matches)
+        else:
+            similarity = 0
+
+        matches_data.append((img_path, similarity))
+
+    # sort matches by similarity score
+    matches_data.sort(key=lambda x: x[1], reverse=True)
+    
+    # get top 5 matches
+    top_matches = matches_data[:5]
+
+    imgarray = []
+    similarity_list = []
+    # Generate HTML content for download
+    html_content = "<html><body>"
+    for i, (img_path, similarity) in enumerate(top_matches):
+        base_img = cv2.imread(img_path)
+        kp1, des1 = orb.detectAndCompute(base_img, None)
+
+        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+        matches = bf.match(des1, des2)
+        matches = sorted(matches, key=lambda x: x.distance)
+
+        img3 = cv2.drawMatches(base_img, kp1, compare_img, kp2, matches[:10], None, flags=2)
+        img3_rgb = cv2.cvtColor(img3, cv2.COLOR_BGR2RGB)
+        
+        
+
+        # Save the image as BytesIO object
+        img_bytes = io.BytesIO()
+        Image.fromarray(img3_rgb).save(img_bytes, format='PNG')
+        img_data = img_bytes.getvalue()
+        imgarray.append(img_bytes)
+        similarity_list.append(similarity)
+
+        # Add the image to the HTML content
+        html_content += f"<h3>비슷한 이미지 #{i+1} (유사도: {similarity:.2f})</h3>"
+        html_content += f"<img src='data:image/png;base64,{base64.b64encode(img_data).decode()}'/><br><br>"
+
+    html_content += "</body></html>"
+
+    # Download button
+    st.download_button("결과를 html로 다운로드 받기 ", data=html_content, file_name="분석 결과.html", mime="text/html")
+
+    return  imgarray, similarity_list
+
+
+
+    # # Display the matched images
+    # for i, (img_path, similarity) in enumerate(top_matches):
+    #     base_img = cv2.imread(img_path)
+    #     kp1, des1 = orb.detectAndCompute(base_img, None)
+
+    #     bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+    #     matches = bf.match(des1, des2)
+    #     matches = sorted(matches, key=lambda x: x.distance)
+
+    #     img3 = cv2.drawMatches(base_img, kp1, compare_img, kp2, matches[:10], None, flags=2)
+        
+    #     # Create a Streamlit image object from the OpenCV image
+    #     # st.write(f"Base image shape: {base_img.shape}")
+    #     # st.write(f"Compare image shape: {compare_img.shape}")
+    #     img_bytes = cv2.imencode('.png', img3)[1].tobytes()
+    #     st.image(Image.open(io.BytesIO(img_bytes)), caption=f'비슷한 이미지 #{i+1} (유사도: {similarity:.2f})') # 비활성화
 
 # 페이지 구성 
 
