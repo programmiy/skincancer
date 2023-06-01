@@ -2,10 +2,7 @@ tensorflow
 matplotlib
 opencv-python-headless
 numpy
-tdqm
-reportlab
 numpy==1.23.3
-pandas==1.5.0
 streamlit==1.12.0
 pycairo==1.23.0;
 streamlit_extras
