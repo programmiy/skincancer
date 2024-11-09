@@ -113,9 +113,7 @@ def intro():
     
     st.metric(label="방문자 수", value=user, delta=user_check(date), help="하루 동안 이 사이트에 방문한 방문자 수입니다.")
 
-    from streamlit_extras.metric_cards import style_metric_cards
-    style_metric_cards()
-    
+
 
 
 
