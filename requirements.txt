@@ -7,4 +7,3 @@ pycairo==1.23.0;
 streamlit_extras
 altair<5
 markdownlit
-streamlit_extras.metric_cards
