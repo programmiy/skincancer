@@ -6,3 +6,4 @@ streamlit==1.12.0
 pycairo==1.23.0;
 streamlit_extras
 altair<5
+markdownlit
