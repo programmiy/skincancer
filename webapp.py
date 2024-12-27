@@ -30,21 +30,22 @@ def get_current_date():
 
 def intro():
     import streamlit as st
-    
-    def increase_visitor_count():
-        current_date = get_current_date()
-        file_path = os.path.join(VISITOR_COUNT_DIR, f"{current_date}.txt")
 
-        if not os.path.exists(file_path):
-            with open(file_path, "w") as f:
-                f.write("0")
+       # 정확히 구현하지 못한 관계로 주석처리
+    # def increase_visitor_count():
+    #     current_date = get_current_date()
+    #     file_path = os.path.join(VISITOR_COUNT_DIR, f"{current_date}.txt")
 
-        with open(file_path, "r+") as f:
-            count = int(f.read())
-            count += 1
-            f.seek(0)
-            f.write(str(count))
-    increase_visitor_count()
+    #     if not os.path.exists(file_path):
+    #         with open(file_path, "w") as f:
+    #             f.write("0")
+
+    #     with open(file_path, "r+") as f:
+    #         count = int(f.read())
+    #         count += 1
+    #         f.seek(0)
+    #         f.write(str(count))
+    # increase_visitor_count()
     st.write("# 피부암 검사를 위한 페이지에 온것을 환영합니다👨‍⚕️")
     st.markdown("""
     **👈 사이드바를 클릭해서** 더 많은 정보를 확인하세요!
