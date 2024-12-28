@@ -83,36 +83,36 @@ def intro():
     from streamlit_extras.badges import badge
 
     badge(type="github", name="programmiy/skincancer")
-    def get_visitor_count(date):
-        file_path = os.path.join(VISITOR_COUNT_DIR, f"{date}.txt")
+    # def get_visitor_count(date):
+    #     file_path = os.path.join(VISITOR_COUNT_DIR, f"{date}.txt")
 
-        if not os.path.exists(file_path):
-            return 0
+    #     if not os.path.exists(file_path):
+    #         return 0
 
-        with open(file_path, "r") as f:
-            count = int(f.read())
-            return count
+    #     with open(file_path, "r") as f:
+    #         count = int(f.read())
+    #         return count
     
-    date = get_current_date()   
-    user = get_visitor_count(date)
+    # date = get_current_date()   
+    # user = get_visitor_count(date)
     
     
-    def get_delta(now): #파라미터 없애기, 혹은  get_current_date 수정
-        now = datetime.datetime.now()
-        delta = now - datetime.timedelta(days= 1)
-        delta = delta.strftime("%Y-%m-%d") # get_current_date랑 겹침
+    # def get_delta(now): #파라미터 없애기, 혹은  get_current_date 수정
+    #     now = datetime.datetime.now()
+    #     delta = now - datetime.timedelta(days= 1)
+    #     delta = delta.strftime("%Y-%m-%d") # get_current_date랑 겹침
         
-        return delta
+    #     return delta
         
-    def user_check(date):
-        delta = get_delta(date)
-        if get_visitor_count(date) - get_visitor_count(delta) < 0:
-            return 0
-        else:
-            return get_visitor_count(date) - get_visitor_count(delta)
+    # def user_check(date):
+    #     delta = get_delta(date)
+    #     if get_visitor_count(date) - get_visitor_count(delta) < 0:
+    #         return 0
+    #     else:
+    #         return get_visitor_count(date) - get_visitor_count(delta)
     
     
-    st.metric(label="방문자 수", value=user, delta=user_check(date), help="하루 동안 이 사이트에 방문한 방문자 수입니다.")
+    # st.metric(label="방문자 수", value=user, delta=user_check(date), help="하루 동안 이 사이트에 방문한 방문자 수입니다.")
 
 
 
